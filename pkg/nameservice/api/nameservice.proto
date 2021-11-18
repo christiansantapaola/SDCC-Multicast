@@ -1,0 +1,58 @@
+syntax="proto3";
+
+option go_package="sdcc/pkg/nameservice";
+
+message NewUser {
+  string ip = 1;
+  uint32 port = 2;
+}
+
+message User {
+  string ip = 1;
+  uint32 port = 2;
+  string id = 3;
+}
+
+enum GroupType {
+  SEQUENCER = 0;
+  CAUSAL = 1;
+  TOTAL = 2;
+}
+
+message NewGroup {
+  string name = 1;
+  User creator = 2;
+}
+
+message GroupName {
+  string name = 1;
+}
+
+message Group {
+  string name = 1;
+  GroupType type = 2;
+  User root = 3;
+}
+
+message UserId {
+  string id = 1;
+}
+
+message LeaveReply {
+  bool error = 1;
+  string message = 2;
+}
+
+message JoinRequest {
+  string group = 1;
+  User user = 2;
+}
+
+
+service NameService {
+  rpc CreateUser(NewUser) returns (User);
+  rpc CreateGroup(NewGroup) returns (Group);
+  rpc JoinGroup(JoinRequest) returns (Group);
+  rpc GetAddress(UserId) returns (User);
+  rpc GetGroupAddresses(Group) returns (stream User);
+}

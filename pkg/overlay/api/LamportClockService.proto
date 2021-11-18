@@ -1,0 +1,23 @@
+syntax="proto3";
+
+option go_package="sdcc/pkg/overlay/api";
+
+enum MessageType {
+  APPLICATION = 0;
+  ACK = 1;
+  SYSTEM = 2;
+}
+
+message MessageLC {
+  MessageType type = 1;
+  uint64 clock = 2;
+  string src = 3;
+  string id = 4;
+  string data = 5;
+}
+
+message SendReply {}
+
+service ReceiverLC {
+  rpc Send(MessageLC) returns (SendReply);
+}
