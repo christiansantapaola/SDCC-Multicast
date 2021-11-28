@@ -307,10 +307,10 @@ func (middleware *MiddlewareVC) RecvWork() {
 				ShortID(msg.GetSrc()), msg.GetType().String(), msg.GetClock(), msg.GetId(), msg.GetData(), middleware.clock.GetClock())
 			//log.Printf("[RECV] clock update after receiving message '%s' to '%d'\n", msg.GetId(), clock)
 		}
-		if msg.GetType() == api.MessageType_SYSTEM {
-			middleware.ExecSystemMessage(msg)
-			continue
-		}
+		//if msg.GetType() == api.MessageType_SYSTEM {
+		//	middleware.ExecSystemMessage(msg)
+		//	continue
+		//}
 		if msg.GetType() == api.MessageType_ACK {
 			err = middleware.log.Log(RECEIVED_ACK, msg)
 			if err != nil {

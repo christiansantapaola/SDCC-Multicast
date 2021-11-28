@@ -90,7 +90,7 @@ func main() {
 		if err != nil {
 			log.Printf("[main]: %v\n", err)
 		}
-		fmt.Printf("%s: %s\n", "[MESSAGE] Data: ", msg)
+		fmt.Printf("%s: %s\n", "[MESSAGE] Data", msg)
 	}
 	middleware.Stop()
 	time.Sleep(11 * time.Second)

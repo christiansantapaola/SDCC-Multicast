@@ -13,13 +13,14 @@ import (
 )
 
 var (
-	tls        	= flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
-	certFile   	= flag.String("cert_file", "", "The TLS cert file")
-	keyFile    	= flag.String("key_file", "", "The TLS key file")
-	port       	= flag.Int("port", 2080, "The server port")
-	config 		= flag.String("config", "config.yml", "path to the config file")
-	help		= flag.Bool("help", false, "print this help message.")
+	tls      = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
+	certFile = flag.String("cert_file", "", "The TLS cert file")
+	keyFile  = flag.String("key_file", "", "The TLS key file")
+	port     = flag.Int("port", 2080, "The server port")
+	config   = flag.String("config", "config.yml", "path to the config file")
+	help     = flag.Bool("help", false, "print this help message.")
 )
+
 func main() {
 	flag.Parse()
 	if *help {

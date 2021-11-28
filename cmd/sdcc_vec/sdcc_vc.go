@@ -11,11 +11,11 @@ import (
 	"os"
 	"sdcc/internal"
 	"sdcc/pkg/nameservice/client"
-	"sdcc/pkg/overlay/clientlc"
+	"sdcc/pkg/overlay/clientvc"
 	"time"
 )
 
-func SendDelay(ctx context.Context, lc *clientlc.MiddlewareLC, message string, delay time.Duration) error {
+func SendDelay(ctx context.Context, lc *clientvc.MiddlewareVC, message string, delay time.Duration) error {
 	time.Sleep(delay)
 	err := lc.Send(ctx, message)
 	if err != nil {
@@ -24,7 +24,7 @@ func SendDelay(ctx context.Context, lc *clientlc.MiddlewareLC, message string, d
 	return nil
 }
 
-func SendWork(lc *clientlc.MiddlewareLC, n int, seed int64) {
+func SendWork(lc *clientvc.MiddlewareVC, n int, seed int64) {
 	i := 0
 	rand.Seed(seed)
 	for j := 0; j < n; j++ {
@@ -78,7 +78,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	middleware, err := clientlc.NewMiddlewareLC(cfg.UserId, *groupName, *logPath, cfg.UserPort, ns, cfg.Verbose, false, opts, sopt)
+	middleware, err := clientvc.NewMiddlewareLC(cfg.UserId, *groupName, *logPath, cfg.UserPort, ns, cfg.Verbose, false, opts, sopt)
 	if err != nil {
 		log.Println("%v\n", err)
 		return
@@ -98,7 +98,7 @@ func main() {
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Printf("%s: %s\n", "[MESSAGE] Data: ", msg)
+		fmt.Printf("%s: %s\n", "[MESSAGE] Data", msg)
 	}
 	middleware.Stop()
 	time.Sleep(11 * time.Second)

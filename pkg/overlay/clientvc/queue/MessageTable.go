@@ -67,7 +67,6 @@ func ParseAck(messageId string) (string, []uint64, error) {
 		return "", nil, fmt.Errorf("messageId '%s' splitted into: %v\n", messageId, toParse)
 	}
 	src = toParse[0]
-	// FIXME
 	lenght := len(toParse[1])
 	res := strings.Split(toParse[1][1:lenght-1], " ")
 	for i := 0; i < len(clock); i++ {
@@ -77,7 +76,6 @@ func ParseAck(messageId string) (string, []uint64, error) {
 		}
 		clock = append(clock, val)
 	}
-	fmt.Println(res)
 	return src, clock, nil
 }
 
