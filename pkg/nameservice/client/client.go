@@ -9,16 +9,16 @@ import (
 	pb "sdcc/pkg/nameservice/nameservice"
 )
 
-func NewClient(serverAddr net.Addr, opts []grpc.DialOption) (*pb.NameServiceClient, error){
+func NewClient(serverAddr net.Addr, opts []grpc.DialOption) (*pb.NameServiceClient, error) {
 	conn, err := grpc.Dial(serverAddr.String(), opts...)
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 	client := pb.NewNameServiceClient(conn)
 	return &client, nil
 }
 
-func CreateUser(ctx context.Context, client pb.NameServiceClient, ip string, port uint32) (*pb.User, error){
+func CreateUser(ctx context.Context, client pb.NameServiceClient, ip string, port int32) (*pb.User, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}

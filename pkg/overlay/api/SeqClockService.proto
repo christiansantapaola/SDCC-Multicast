@@ -8,7 +8,7 @@ enum MessageType {
   SYSTEM = 2;
 }
 
-message MessageLC {
+message MessageSeq {
   MessageType type = 1;
   uint64 clock = 2;
   string src = 3;
@@ -19,6 +19,6 @@ message MessageLC {
 message EnqueueReply {}
 
 
-service MessageQueueLC {
-  rpc Enqueue(MessageLC) returns (EnqueueReply);
+service MessageQueueSeq {
+  rpc Enqueue(MessageSeq) returns (EnqueueReply);
 }

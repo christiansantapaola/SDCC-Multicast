@@ -4,12 +4,12 @@ option go_package="sdcc/pkg/nameservice";
 
 message NewUser {
   string ip = 1;
-  uint32 port = 2;
+  int32 port = 2;
 }
 
 message User {
   string ip = 1;
-  uint32 port = 2;
+  int32 port = 2;
   string id = 3;
 }
 

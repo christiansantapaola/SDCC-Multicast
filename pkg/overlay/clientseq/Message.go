@@ -1,7 +1,7 @@
-package clientlc
+package clientseq
 
 import (
-	pb "sdcc/pkg/overlay/clientlc/pb"
+	pb "sdcc/pkg/overlay/clientseq/pb"
 )
 
 type Message struct {
@@ -11,7 +11,7 @@ type Message struct {
 	message string
 }
 
-func NewMessage(apiMsg *pb.MessageLC) *Message {
+func NewMessage(apiMsg *pb.MessageSeq) *Message {
 	return &Message{src: apiMsg.GetSrc(), id: apiMsg.GetId(), clock: apiMsg.GetClock(), message: apiMsg.GetData()}
 }
 

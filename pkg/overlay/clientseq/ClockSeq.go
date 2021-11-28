@@ -1,4 +1,4 @@
-package clientlc
+package clientseq
 
 import (
 	"sync"
@@ -21,28 +21,26 @@ func NewClock() *Clock {
 	return &Clock{clock: 0}
 }
 
-func (cl *Clock) Lock() {
-	cl.mutex.Lock()
-}
-
-func (cl *Clock) Unlock() {
-	cl.mutex.Unlock()
-}
-
 func (cl *Clock) Increase() uint64 {
+	cl.mutex.Lock()
 	cl.clock = cl.clock + 1
 	clock := cl.clock
+	cl.mutex.Unlock()
 	return clock
 
 }
 
 func (cl *Clock) Update(clock uint64) uint64 {
+	cl.mutex.Lock()
 	cl.clock = max(cl.clock+1, clock)
 	clockCpy := cl.clock
+	cl.mutex.Unlock()
 	return clockCpy
 }
 
 func (cl *Clock) GetClock() uint64 {
+	cl.mutex.Lock()
 	clock := cl.clock
+	cl.mutex.Unlock()
 	return clock
 }

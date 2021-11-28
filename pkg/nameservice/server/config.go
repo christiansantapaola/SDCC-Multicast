@@ -1,15 +1,15 @@
 package server
 
 import (
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"os"
 	"time"
 )
 
 type Config struct {
 	Etcd struct {
-		DialTimeout time.Duration 	`yaml:"dial_timeout"`
-		Endpoints []string			`yaml:"endpoints"`
+		DialTimeout time.Duration `yaml:"dial_timeout"`
+		Endpoints   []string      `yaml:"endpoints"`
 	}
 }
 
@@ -29,7 +29,7 @@ func ReadCfg(path string) (*Config, error) {
 }
 
 func GenDefaultCfg(path string) error {
-	f, err := os.OpenFile(path, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0666)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
 		return err
 	}

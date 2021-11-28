@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"go.etcd.io/etcd/client/v3"
 	"google.golang.org/protobuf/proto"
-	"hash"
 	pb "sdcc/pkg/nameservice/nameservice"
 	"time"
 )
@@ -22,9 +21,12 @@ func NewNamingService(cfg *Config) *NamingServiceServer {
 	return &NamingServiceServer{DialTimeout: cfg.Etcd.DialTimeout, Endpoints: cfg.Etcd.Endpoints}
 }
 
-func genID(hash hash.Hash, ip string, port uint) string {
+func genID(ip string, port int) string {
+	h := sha256.New()
 	idstr := fmt.Sprintf("%s:%d", ip, port)
-	return fmt.Sprintf("%x", hash.Sum([]byte(idstr)))
+	h.Write([]byte(idstr))
+	bh := h.Sum(nil)
+	return fmt.Sprintf("%x", bh)
 }
 
 func getUserID(id string) string {
@@ -39,15 +41,15 @@ func getGroupUserKey(group string, id string) string {
 	return "group/" + group + "/" + id
 }
 
-func (s *NamingServiceServer) CreateUser(ctx context.Context, newUser *pb.NewUser) (*pb.User, error) {
+func (s NamingServiceServer) CreateUser(ctx context.Context, newUser *pb.NewUser) (*pb.User, error) {
 	cli, err := clientv3.New(clientv3.Config{DialTimeout: s.DialTimeout, Endpoints: s.Endpoints})
 	if err != nil {
 		return nil, err
 	}
 	defer cli.Close()
-	userId := genID(sha256.New(), newUser.Ip, uint(newUser.Port))
+	userId := genID(newUser.Ip, int(newUser.Port))
 	userKey := getUserID(userId)
-	user := pb.User{Id: userId, Ip: newUser.Ip, Port: uint32(newUser.Port)}
+	user := pb.User{Id: userId, Ip: newUser.Ip, Port: newUser.Port}
 	data, err := proto.Marshal(&user)
 	_, err = cli.KV.Put(ctx, userKey, string(data))
 	if err != nil {
@@ -56,7 +58,7 @@ func (s *NamingServiceServer) CreateUser(ctx context.Context, newUser *pb.NewUse
 	return &user, nil
 }
 
-func (s *NamingServiceServer) CreateGroup(ctx context.Context, newGroup *pb.NewGroup) (*pb.Group, error) {
+func (s NamingServiceServer) CreateGroup(ctx context.Context, newGroup *pb.NewGroup) (*pb.Group, error) {
 	cli, err := clientv3.New(clientv3.Config{DialTimeout: s.DialTimeout, Endpoints: s.Endpoints})
 	if err != nil {
 		return nil, err
@@ -72,7 +74,7 @@ func (s *NamingServiceServer) CreateGroup(ctx context.Context, newGroup *pb.NewG
 	return &group, nil
 }
 
-func (s *NamingServiceServer) GetAddress(ctx context.Context, userID *pb.UserId) (*pb.User, error) {
+func (s NamingServiceServer) GetAddress(ctx context.Context, userID *pb.UserId) (*pb.User, error) {
 	cli, err := clientv3.New(clientv3.Config{DialTimeout: s.DialTimeout, Endpoints: s.Endpoints})
 	if err != nil {
 		return nil, err
@@ -91,7 +93,7 @@ func (s *NamingServiceServer) GetAddress(ctx context.Context, userID *pb.UserId)
 	return &user, nil
 }
 
-func (s *NamingServiceServer) JoinGroup(ctx context.Context, group *pb.JoinRequest) (*pb.Group, error) {
+func (s NamingServiceServer) JoinGroup(ctx context.Context, group *pb.JoinRequest) (*pb.Group, error) {
 	cli, err := clientv3.New(clientv3.Config{DialTimeout: s.DialTimeout, Endpoints: s.Endpoints})
 	if err != nil {
 		return nil, err
@@ -102,14 +104,14 @@ func (s *NamingServiceServer) JoinGroup(ctx context.Context, group *pb.JoinReque
 	if err != nil {
 		return nil, err
 	}
-	_ , err = cli.KV.Put(ctx, key, string(value))
+	_, err = cli.KV.Put(ctx, key, string(value))
 	if err != nil {
 		return nil, err
 	}
 	return &pb.Group{Name: group.Group}, nil
 }
 
-func (s *NamingServiceServer) GetGroupAddresses(group *pb.Group,  stream pb.NameService_GetGroupAddressesServer) error {
+func (s NamingServiceServer) GetGroupAddresses(group *pb.Group, stream pb.NameService_GetGroupAddressesServer) error {
 	cli, err := clientv3.New(clientv3.Config{DialTimeout: s.DialTimeout, Endpoints: s.Endpoints})
 	if err != nil {
 		return err

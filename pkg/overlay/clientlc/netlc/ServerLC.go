@@ -1,0 +1,56 @@
+package netlc
+
+import (
+	"context"
+	"fmt"
+	"google.golang.org/grpc"
+	"log"
+	"net"
+	pb "sdcc/pkg/overlay/clientlc/pb"
+	"sdcc/pkg/overlay/clientlc/queue"
+)
+
+type ServerLC struct {
+	pb.UnimplementedMessageQueueLCServer
+	queue    *queue.MessageLCFIFO
+	listener *net.Listener
+	server   *grpc.Server
+	verbose  bool
+}
+
+func NewServerLC(verbose bool) *ServerLC {
+	rec := ServerLC{queue: queue.NewMessageLCFifo(), verbose: verbose}
+	return &rec
+}
+
+func (receiver *ServerLC) StartServer(port int, opts []grpc.ServerOption) {
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	receiver.listener = &lis
+	receiver.server = grpc.NewServer(opts...)
+	pb.RegisterMessageQueueLCServer(receiver.server, receiver)
+	err = receiver.server.Serve(lis)
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+}
+
+func (receiver *ServerLC) Stop() {
+	receiver.server.GracefulStop()
+}
+
+// grpc function, can be called by remote host
+func (receiver *ServerLC) Enqueue(ctx context.Context, message *pb.MessageLC) (*pb.EnqueueReply, error) {
+	if receiver.verbose {
+		log.Printf("[ServerLC] Ready to enqueue Message: %s, %s, %s\n", message.GetSrc(), message.GetId(), message.GetData())
+	}
+	receiver.queue.Push(message)
+	return &pb.EnqueueReply{}, nil
+}
+
+// local function
+func (receiver *ServerLC) Pop() *pb.MessageLC {
+	return receiver.queue.Pop()
+}
