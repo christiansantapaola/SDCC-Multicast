@@ -50,6 +50,7 @@ type MiddlewareSeq struct {
 	clock             *Clock
 	recvQueue         *queue.MessageSeqFIFO
 	socket            *netseq.MulticastSocket
+	clientSeq         *netseq.MulticastSender
 	logPath           string
 	log               *MessageLog
 	stop              bool
@@ -81,6 +82,11 @@ func NewMiddlewareSeq(self, groupName, logPath string, port int, nameserver *nam
 		return nil, err
 	}
 	var socket *netseq.MulticastSocket
+	var clientSeq *netseq.MulticastSender = nil
+	sequencerServices, err := group.GetSequencerServices()
+	if err != nil {
+		return nil, err
+	}
 	if rank == 0 {
 		if verbose {
 			log.Printf("netseq.Open(port: %d, sopt: %v, services: %v, dopt: %v)\n", port, sopt, services, dopt)
@@ -89,11 +95,17 @@ func NewMiddlewareSeq(self, groupName, logPath string, port int, nameserver *nam
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		sequencerServices, err := group.GetSequencerServices()
+		clientSeq, err = netseq.NewMulticastSender([]net.Addr{sequencerServices}, dopt)
 		if err != nil {
+			socket.Close()
 			return nil, err
 		}
+		err = clientSeq.Connect(context.Background())
+		if err != nil {
+			socket.Close()
+			return nil, err
+		}
+	} else {
 		sequencer := []net.Addr{sequencerServices}
 		if verbose {
 			log.Printf("netseq.Open(port: %d, sopt: %v, services: %v, dopt: %v)\n", port, sopt, sequencer, dopt)
@@ -113,6 +125,7 @@ func NewMiddlewareSeq(self, groupName, logPath string, port int, nameserver *nam
 		nameServiceClient: nameserver,
 		group:             group,
 		socket:            socket,
+		clientSeq:         clientSeq,
 		log:               NewMessageLog(logf),
 		clock:             clock,
 		recvQueue:         recvQueue,
@@ -121,6 +134,7 @@ func NewMiddlewareSeq(self, groupName, logPath string, port int, nameserver *nam
 	}
 	// wait some arbitrary time to start the server.
 	// time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
 	go middleware.MiddlewareWork()
 	return &middleware, nil
 }
@@ -161,9 +175,16 @@ func (middleware *MiddlewareSeq) Send(ctx context.Context, message string) error
 	if err != nil {
 		return err
 	}
-	err = middleware.socket.Send(ctx, &seqMessage)
-	if err != nil {
-		return err
+	if middleware.AmITheSequencer() {
+		err = middleware.clientSeq.Send(ctx, &seqMessage)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = middleware.socket.Send(ctx, &seqMessage)
+		if err != nil {
+			return err
+		}
 	}
 	err = middleware.log.Log(SENT, &seqMessage)
 	if err != nil {
@@ -219,9 +240,16 @@ func (middleware *MiddlewareSeq) SendSys(ctx context.Context, event SystemEvent)
 	if err != nil {
 		return err
 	}
-	err = middleware.socket.TrySend(ctx, &sysMsg)
-	if err != nil {
-		return err
+	if middleware.AmITheSequencer() {
+		err = middleware.clientSeq.TrySend(ctx, &sysMsg)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = middleware.socket.TrySend(ctx, &sysMsg)
+		if err != nil {
+			return err
+		}
 	}
 	err = middleware.log.Log(SENT, &sysMsg)
 	if err != nil {
@@ -244,7 +272,7 @@ func (middleware *MiddlewareSeq) MiddlewareWork() {
 				ShortID(msg.GetSrc()), msg.GetType().String(), msg.GetClock(), msg.GetId(), msg.GetData())
 			//log.Printf("[RECV] clock update after receiving message '%s' to '%d'\n", msg.GetId(), clock)
 		}
-		if middleware.AmITheSequencer() && msg.GetSrc() != middleware.group.GetMyID() {
+		if middleware.AmITheSequencer() {
 			if middleware.verbose {
 				log.Printf("[RELAY] message from '%s' of type '%s' with clock '%d', id '%s' and data '%s'\n",
 					ShortID(msg.GetSrc()), msg.GetType().String(), msg.GetClock(), msg.GetId(), msg.GetData())

@@ -12,7 +12,7 @@ type ClientSeq struct {
 	clientSeq pb.MessageQueueSeqClient
 }
 
-func NewClientLC(service net.Addr, opt []grpc.DialOption) (*ClientSeq, error) {
+func NewClientSeq(service net.Addr, opt []grpc.DialOption) (*ClientSeq, error) {
 	dial, err := grpc.Dial(service.String(), opt...)
 	if err != nil {
 		return nil, err

@@ -54,3 +54,7 @@ func (receiver *ServerSeq) Enqueue(ctx context.Context, message *pb.MessageSeq) 
 func (receiver *ServerSeq) Pop() *pb.MessageSeq {
 	return receiver.queue.Pop()
 }
+
+func (receiver *ServerSeq) Push(msg *pb.MessageSeq) {
+	receiver.queue.Push(msg)
+}

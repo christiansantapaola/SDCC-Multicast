@@ -65,8 +65,7 @@ func main() {
 
 	nameServerAddr, err := net.ResolveTCPAddr("tcp", cfg.NameServerAddress)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 	var opts []grpc.DialOption
 	var sopt []grpc.ServerOption
@@ -75,22 +74,15 @@ func main() {
 	}
 	ns, err := client.NewClient(nameServerAddr, opts)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatalln(err)
 	}
 	middleware, err := clientvc.NewMiddlewareLC(cfg.UserId, *groupName, *logPath, cfg.UserPort, ns, cfg.Verbose, false, opts, sopt)
 	if err != nil {
-		log.Println("%v\n", err)
-		return
+		log.Fatalln("%v\n", err)
 	}
 	id := middleware.GetGroupID()
 	rank, _ := middleware.GetRank()
 	fmt.Printf("MyID: %s\nmyRank: %d\nShortID: %s\n", id, rank, middleware.GetShortID())
-	//err = middleware.WaitToStart(context.Background())
-	//if err != nil {
-	//	log.Println(err)
-	//	return
-	//}
 	n := 10
 	go SendWork(middleware, n, int64(4096*rank))
 	for i := 0; i < n*middleware.GetGroupSize(); i++ {
@@ -101,5 +93,4 @@ func main() {
 		fmt.Printf("%s: %s\n", "[MESSAGE] Data", msg)
 	}
 	middleware.Stop()
-	time.Sleep(11 * time.Second)
 }

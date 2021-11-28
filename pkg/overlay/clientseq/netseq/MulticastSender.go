@@ -43,7 +43,7 @@ func (multicastSender *MulticastSender) TryConnect() error {
 	var errRes error = nil
 	for i := 0; i < len(multicastSender.clients); i++ {
 		if multicastSender.clients[i] == nil {
-			clients, err := NewClientLC(multicastSender.services[i], multicastSender.opts)
+			clients, err := NewClientSeq(multicastSender.services[i], multicastSender.opts)
 			if err != nil {
 				log.Printf("[MulticastSender.TryConnect()] %v\n", err)
 				errRes = err

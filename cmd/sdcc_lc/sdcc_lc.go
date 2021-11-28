@@ -75,13 +75,11 @@ func main() {
 	}
 	ns, err := client.NewClient(nameServerAddr, opts)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatalln(err)
 	}
 	middleware, err := clientlc.NewMiddlewareLC(cfg.UserId, *groupName, *logPath, cfg.UserPort, ns, cfg.Verbose, false, opts, sopt)
 	if err != nil {
-		log.Println("%v\n", err)
-		return
+		log.Fatalln("%v\n", err)
 	}
 	id := middleware.GetGroupID()
 	rank, _ := middleware.GetRank()
@@ -101,5 +99,4 @@ func main() {
 		fmt.Printf("%s: %s\n", "[MESSAGE] Data", msg)
 	}
 	middleware.Stop()
-	time.Sleep(11 * time.Second)
 }
