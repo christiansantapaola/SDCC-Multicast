@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+/*
+	Configurazione del name server.
+	DialTimeout: time out per la connesione al cluster etcd
+	Endpoints: punti di accesso al cluster etcd.
+*/
+
 type Config struct {
 	Etcd struct {
 		DialTimeout time.Duration `yaml:"dial_timeout"`

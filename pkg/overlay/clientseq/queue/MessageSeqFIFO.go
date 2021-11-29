@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+/*
+	Implementazione di una coda FIFO thread-safe.
+*/
+
 type MessageSeqFIFO struct {
 	queue *list.List
 	mutex sync.Mutex

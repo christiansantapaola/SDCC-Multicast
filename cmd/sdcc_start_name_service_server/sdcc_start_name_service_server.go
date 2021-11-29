@@ -12,6 +12,12 @@ import (
 	"sdcc/pkg/nameservice/server"
 )
 
+/*
+	Questo eseguibile instanzia un ending point del name service.
+	Richiede un istanza attiva del datastore etcd, i cui endpoint devono essere specificati nel file di configurazione.
+	La comunicazione avviene tramite grpc e protobuf.
+*/
+
 var (
 	tls      = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	certFile = flag.String("cert_file", "", "The TLS cert file")

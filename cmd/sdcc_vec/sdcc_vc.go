@@ -15,6 +15,11 @@ import (
 	"time"
 )
 
+/*
+	Utility di test del servizio multicast con clock vettoriale.
+	Questa utility manda un numero prestabilito di messaggi alternati da un delay randomico dai 5 ai 10 secondi.
+*/
+
 func SendDelay(ctx context.Context, lc *clientvc.MiddlewareVC, message string, delay time.Duration) error {
 	time.Sleep(delay)
 	err := lc.Send(ctx, message)
@@ -25,19 +30,14 @@ func SendDelay(ctx context.Context, lc *clientvc.MiddlewareVC, message string, d
 }
 
 func SendWork(lc *clientvc.MiddlewareVC, n int, seed int64) {
-	i := 0
 	rand.Seed(seed)
 	for j := 0; j < n; j++ {
 		delay := time.Duration(time.Duration(5+rand.Intn(5)) * time.Second)
-		str := fmt.Sprintf("%s:%s:%d", "msg", lc.GetShortID(), i)
-		//fmt.Printf("sending: %s\n", str)
+		str := fmt.Sprintf("%s:%s:%d", "msg", lc.GetShortID(), j)
 		err := SendDelay(context.Background(), lc, str, delay)
 		if err != nil {
 			log.Println(err)
-			// os.Exit(1)
 		}
-		//fmt.Printf("send: %s\n", str)
-		i++
 	}
 }
 
@@ -46,6 +46,7 @@ func main() {
 	configPath := flag.String("config", "sdcc_config.yaml", "path to the config")
 	groupName := flag.String("group", "", "the group to connect")
 	logPath := flag.String("logPath", "log.txt", "path to log")
+	numMsg := flag.Int("numMsg", 10, "number of message to send")
 	flag.Parse()
 	if *helpFlag || len(os.Args) < 2 {
 		flag.PrintDefaults()
@@ -83,8 +84,9 @@ func main() {
 	id := middleware.GetGroupID()
 	rank, _ := middleware.GetRank()
 	fmt.Printf("MyID: %s\nmyRank: %d\nShortID: %s\n", id, rank, middleware.GetShortID())
-	n := 10
-	go SendWork(middleware, n, int64(4096*rank))
+	n := *numMsg
+	seed := int64(4096 * rank)
+	go SendWork(middleware, n, seed)
 	for i := 0; i < n*middleware.GetGroupSize(); i++ {
 		msg, err := middleware.Recv(context.Background())
 		if err != nil {

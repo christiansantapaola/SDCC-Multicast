@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+/*
+	Implementazione di una coda FIFO, basata su linked list (list.list).
+	La coda FIFO è thread-safe grazie all utilizzo di un mutex
+*/
+
 type MessageVCFIFO struct {
 	queue *list.List
 	mutex sync.Mutex

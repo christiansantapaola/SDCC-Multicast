@@ -7,6 +7,11 @@ import (
 	pb "sdcc/pkg/overlay/clientseq/pb"
 )
 
+/*
+	ClientSeq è un oggetto che gestisce una connesione client con il servizio grpc MessageQueueSeq
+	Si occupa di aprire una connessione è di chiamare i metodi rpc sul servizio.
+*/
+
 type ClientSeq struct {
 	Dial      *grpc.ClientConn
 	clientSeq pb.MessageQueueSeqClient

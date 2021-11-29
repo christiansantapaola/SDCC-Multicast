@@ -4,6 +4,11 @@ import (
 	"sync"
 )
 
+/*
+	Implementazione di un clock scalare thread-safe.
+	In questa implementazione il suo scopo è di dare un numero univoco ad ogni messaggio da inviare.
+*/
+
 type Clock struct {
 	clock uint64
 	mutex sync.Mutex

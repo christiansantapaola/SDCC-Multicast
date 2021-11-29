@@ -16,6 +16,17 @@ import (
 	"time"
 )
 
+/*
+	MiddlewareVC è l'interfaccia con cui l'utente si interfaccia al sistema.
+	Si occupa di:
+		- si connette alla rete di overlay
+		- inizializza le strutture necessarie alla comunicazione
+		- tenere traccia del clock vettoriale, e aggiornalo correttamente.
+		- ricevere messaggi/ mandare ack ai messaggi ricevuti / inviare nuovi messaggi.
+		- collezionare informazioni sulla rete.
+	Il suo utilizzo tuttavia si ferma principalmente per operazioni di Send/Recv.
+*/
+
 type SystemEvent int
 
 const (
@@ -65,6 +76,18 @@ type MiddlewareVC struct {
 	trySend           bool
 }
 
+/*
+	Instanza un nuovo Middleware:
+	self: il mio id all 'interno del gruppo
+	groupName: nome del gruppo
+	logPath: path del file dove verra scritto il log di rete.
+	port: porta di ascolte del server grpc.
+	nameserver: client grpc del nameserver
+	verbose: modalita di operazione debug.
+	trySend: indica di non provare a rimandare i messaggi falliti, utile per il debug.
+	dopt: opzioni per i client grpc
+	sopt: Opzioni per il server grpc
+*/
 func NewMiddlewareLC(self, groupName, logPath string, port int, nameserver *nameservice.NameServiceClient, verbose bool, trySend bool, dopt []grpc.DialOption, sopt []grpc.ServerOption) (*MiddlewareVC, error) {
 	if verbose {
 		log.Printf("client.GetAddressGroup(context.Background(), *nameserver: %v, groupName:%s)\n", nameserver, groupName)
@@ -129,6 +152,10 @@ func ShortID(self string) string {
 	return self[:6]
 }
 
+/*
+	Send:
+		Invia il messaggio input in broadcast a tutti i membri del gruppo noi inclusi.
+*/
 func (middleware *MiddlewareVC) Send(ctx context.Context, message string) error {
 	middleware.clock.Lock()
 	defer middleware.clock.Unlock()
@@ -167,6 +194,11 @@ func (middleware *MiddlewareVC) Send(ctx context.Context, message string) error 
 	return nil
 }
 
+/*
+	Recv:
+		Ricevi il prossimo messaggio, la semantica è bloccante.
+*/
+
 func (middleware *MiddlewareVC) Recv(ctx context.Context) (string, error) {
 	for {
 		select {
@@ -186,6 +218,10 @@ func (middleware *MiddlewareVC) Recv(ctx context.Context) (string, error) {
 	}
 }
 
+/*
+	RecvMsg:
+	Ritorna l'intero messaggio è non solo il dato.
+*/
 func (middleware *MiddlewareVC) RecvMsg(ctx context.Context) (*api.MessageVC, error) {
 	for {
 		select {
@@ -202,6 +238,10 @@ func (middleware *MiddlewareVC) RecvMsg(ctx context.Context) (*api.MessageVC, er
 	}
 }
 
+/*
+	SendAck:
+	Invia l'ack del messaggio di input in broadcast al gruppo noi inclusi.
+*/
 func (middleware *MiddlewareVC) SendAck(ctx context.Context, message *api.MessageVC) error {
 	middleware.clock.Lock()
 	defer middleware.clock.Unlock()
@@ -246,6 +286,10 @@ func (middleware *MiddlewareVC) SendAck(ctx context.Context, message *api.Messag
 	return nil
 }
 
+/*
+	SendSys:
+		Send per messaggi di sistema.
+*/
 func (middleware *MiddlewareVC) SendSys(ctx context.Context, event SystemEvent, try bool) error {
 	middleware.clock.Lock()
 	defer middleware.clock.Unlock()
@@ -282,6 +326,11 @@ func (middleware *MiddlewareVC) SendSys(ctx context.Context, event SystemEvent, 
 	return nil
 }
 
+/*
+	RecvAndUpdate
+	Recv un messaggio dalla MulticastSocket ed aggiorna il clock logico vettoriale correttamente.
+	L'intera logica dell'evento Receive è qui dentro.
+*/
 func (middleware *MiddlewareVC) RecvAndUpdate() *api.MessageVC {
 	middleware.clock.Lock()
 	defer middleware.clock.Unlock()
@@ -294,6 +343,12 @@ func (middleware *MiddlewareVC) RecvAndUpdate() *api.MessageVC {
 	}
 }
 
+/*
+	Lavoro di background del MiddlewareLC:
+		1. Riceve un nuovo messaggio ed aggiorna il clock
+		2. Se è un messaggio invia l'ack ed inseriscilo nella coda di ricezione.
+		3. Se è un ack, non inviare un altro ack ma inseriscilo comunque nella coda di ricezione.
+*/
 func (middleware *MiddlewareVC) RecvWork() {
 	for {
 		var err error
@@ -305,12 +360,7 @@ func (middleware *MiddlewareVC) RecvWork() {
 		if middleware.verbose {
 			log.Printf("[RECV] Received message from '%s' of type '%s' with clock '%d', id '%s' and data '%s' -> new clock :%d\n",
 				ShortID(msg.GetSrc()), msg.GetType().String(), msg.GetClock(), msg.GetId(), msg.GetData(), middleware.clock.GetClock())
-			//log.Printf("[RECV] clock update after receiving message '%s' to '%d'\n", msg.GetId(), clock)
 		}
-		//if msg.GetType() == api.MessageType_SYSTEM {
-		//	middleware.ExecSystemMessage(msg)
-		//	continue
-		//}
 		if msg.GetType() == api.MessageType_ACK {
 			err = middleware.log.Log(RECEIVED_ACK, msg)
 			if err != nil {
@@ -332,10 +382,15 @@ func (middleware *MiddlewareVC) RecvWork() {
 				log.Fatalln(err)
 			}
 		}
-		time.Sleep(1 * time.Millisecond)
 	}
 }
 
+/*
+	Stop
+		indica la volonta di terminare correttamente la comunicazione multicast.
+		NB: i messaggi qui vengono inviati senza resend in caso di fallimento perché se
+		i peer iniziano a chiudere aspetteremmo indefinitamente per la risposta di un peer che non è piú on.
+*/
 func (middleware *MiddlewareVC) Stop() {
 	err := middleware.SendSys(context.Background(), EXIT, true)
 	if err != nil {
@@ -352,8 +407,6 @@ func (middleware *MiddlewareVC) Stop() {
 			middleware.ExecSystemMessage(msg)
 		}
 	}
-	//middleware.stop = true
-	//middleware.socket.Close()
 }
 
 func (middleware *MiddlewareVC) GetGroupSize() int {

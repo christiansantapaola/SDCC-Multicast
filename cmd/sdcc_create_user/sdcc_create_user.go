@@ -12,6 +12,14 @@ import (
 	"sdcc/pkg/nameservice/nameservice"
 )
 
+/*
+	Questo eseguibile registra un nuovo utente ad un istanza attiva del name server.
+	Richiede la presenza di un file di configurazione generato dall'apposito eseguibile
+	`sdcc_gen_config` configurato con i parametri di connessione.
+	Questo eseguibile sovvrascrive il file di configurazione immettendo le informazioni di
+	registrazione, quali l'ID all'interno della rete di overlay.
+*/
+
 func createUser(ctx context.Context, cl nameservice.NameServiceClient, ip string, port int) *nameservice.User {
 	user, err := client.CreateUser(ctx, cl, ip, int32(port))
 	if err != nil {

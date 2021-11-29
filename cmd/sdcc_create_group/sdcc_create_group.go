@@ -12,6 +12,14 @@ import (
 	"sdcc/pkg/nameservice/nameservice"
 )
 
+/*
+	Questo eseguibile registra un nuovo gruppo nell'istanza del name server.
+	Per creare un gruppo bisogna essersi registrati come utenti al name server in precedenza.
+	Il gruppo è identificato da un nome, il nome deve essere univoco.
+	Il programma richiede la presenza di un config file generato dall'apposito eseguibile ´sdcc_gen_config´ e
+	configurato con i propri parametri di connessione.
+*/
+
 func createGroup(ctx context.Context, cl nameservice.NameServiceClient, group, id, ip string, port int) *nameservice.Group {
 	groupInfo, err := client.CreateGroup(ctx, cl, group, &nameservice.User{Id: id, Ip: ip, Port: int32(port)})
 	if err != nil {
@@ -54,6 +62,5 @@ func main() {
 	groupInfo := createGroup(ctx, *cl, *group, cfg.UserId, cfg.UserIp, cfg.UserPort)
 	fmt.Printf("%s\n", "Group Info")
 	fmt.Printf("%s: %s\n", "Group Name", groupInfo.Name)
-	fmt.Printf("%s: %s\n", "Group Type", groupInfo.GetType().String())
 	os.Exit(0)
 }

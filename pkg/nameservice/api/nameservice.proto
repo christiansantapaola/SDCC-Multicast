@@ -13,12 +13,6 @@ message User {
   string id = 3;
 }
 
-enum GroupType {
-  SEQUENCER = 0;
-  CAUSAL = 1;
-  TOTAL = 2;
-}
-
 message NewGroup {
   string name = 1;
   User creator = 2;
@@ -30,7 +24,6 @@ message GroupName {
 
 message Group {
   string name = 1;
-  GroupType type = 2;
   User root = 3;
 }
 

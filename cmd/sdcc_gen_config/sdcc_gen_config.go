@@ -7,6 +7,11 @@ import (
 	"sdcc/internal"
 )
 
+/*
+	Questo eseguibile genera uno scheletro di configurazione.
+	Il file di configurazione è in formato yaml
+*/
+
 func main() {
 	config := flag.String("config", "sdcc_config.yaml", "path to config file")
 	help := flag.Bool("help", false, "print this help message.")

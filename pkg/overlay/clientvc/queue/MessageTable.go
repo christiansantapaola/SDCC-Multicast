@@ -8,6 +8,14 @@ import (
 	"sync"
 )
 
+/*
+	La messageTable nasce con l'intezione di tenere traccia dello stato dei messaggi arrivati, deve:
+		1. tenere traccia di tutti i messaggi arrivati che non sono ancora stati ricevuti.
+		2. deve saper indicare se un messaggio è pronto per essere rilasciato o no.
+	La messageTable si avvale di una struttura di supporto chiamata AckTable che tiene traccia di tutti gli ack
+	univoci che sono stati ricevuti per un particolare messaggio.
+*/
+
 type AckTable struct {
 	ids []string
 }
@@ -37,6 +45,11 @@ func (table *AckTable) GetNumAcks() int {
 	return len(table.ids)
 }
 
+/*
+	La messageTable è un oggetto che si occupa di tenere traccia dei messaggi arrivati e del loro stato:
+	è implementata come una mappa ID messaggio -> Info sul messaggio.
+*/
+
 type TableEntry struct {
 	msg   *api.MessageVC
 	clock []uint64
@@ -59,6 +72,12 @@ func NewMessageTable(groupsize int) *MessageTable {
 	}
 }
 
+/*
+	ParseAck:
+		dato un id di un messaggio ne ricava il mittente e il suo clock.
+		Un ID di un messaggio è della forma "mittente:clock"
+		es: "user:[0 1 2 1 0 0 1]"
+*/
 func ParseAck(messageId string) (string, []uint64, error) {
 	var src string
 	var clock []uint64
@@ -93,25 +112,37 @@ func less(clock1, clock2 []uint64) bool {
 
 }
 
+/*
+	Il metodo Insert() rappresenta il cuore della message table.
+	Se un messaggio arriva ho 4 possibili casi dati dalle risposte a due domande:
+		1. Il messaggio è un ack?
+		2. Il messaggio è gia stato registrato?
+	Se il messaggio non è un ack e non è stato registrato:
+		allora creo una nuova entry nella tabella con le informazioni del messaggio e ritorno
+	Se il messaggio è un ack e il messaggio a cui risponde è registrato:
+		aggiorno le informazioni dell messaggio, indicando che ha ricevuto un nuovo ack.
+	Se il messaggio è un ack e il messaggio a cui risponde non è registrato:
+		ho un caso in cui mi è arrivato prima l'ack di un messaggio del messaggio stesso.
+		In questo caso devo creare nella tabella una entry in cui dico: in arrivo c'è un messaggio con clock
+		dato dall'ack, ma non ho ancora il messaggio stesso.
+	Se il messaggio non è un ack ed é stato gia registrato:
+		Questo caso risulta dal caso di sopra, quindi aggiorno l'entry gia esistente con il nuovo messaggio.
+*/
+
 func (table *MessageTable) Insert(message *api.MessageVC) error {
 	table.mutex.Lock()
 	defer table.mutex.Unlock()
 	if message.GetType() == api.MessageType_ACK {
 		entry, exists := table.table[message.GetData()]
 		if !exists {
-			//log.Printf("ACK ARRIVED BEFORE MESSAGE WITH ID '%s' AND DATA '%s'\n", message.GetId(), message.GetData())
 			src, clock, err := ParseAck(message.GetData())
 			if err != nil {
 				//log.Printf("%s: %v\n", "ParseAck() failed", err)
 				return err
 			}
-			//log.Printf("ID PARSED INTO '%s' AND '%d'\n", src, clock)
 			newEntry := TableEntry{msg: nil, acks: NewAckTracker(), src: src, clock: clock}
-			//log.Printf("NEW ENTRY: %v\n", entry)
 			newEntry.acks.Insert(message.GetId())
-			//log.Printf("INSERT ACK: %d", newEntry.acks.GetNumAcks())
 			table.table[message.GetData()] = newEntry
-			//log.Printf("INSERT NEW ENTRY: %v\n", table.table[message.GetData()])
 		} else {
 			entry.acks.Insert(message.GetId())
 		}
@@ -129,27 +160,26 @@ func (table *MessageTable) Insert(message *api.MessageVC) error {
 	return nil
 }
 
+/*
+	IsReady:
+		La funzione IsReady si occupa di stabilire se un messaggio è pronto per essere rilasciato all utente oppure no.
+		Controlla che il messaggio input abbia ricevuto tutti gli ack e che non ci siano messaggi in arrivo
+		con clock minore del suo.
+*/
 func (table *MessageTable) IsReady(messageID string) (bool, error) {
 	table.mutex.Lock()
 	defer table.mutex.Unlock()
-	//log.Printf("IsReady(%s)\n", messageID)
 	entry, exists := table.table[messageID]
 	if !exists {
-		//log.Printf("entry does not exists\n")
 		return false, fmt.Errorf("ID '%s' not found", messageID)
 	}
-	//log.Printf("table.table[messageID] = %v\n", table.table[messageID])
 	ackReceived := entry.acks.GetNumAcks() == table.groupSize
-	//log.Printf("%d == %d : %t", entry.acks.GetNumAcks(), table.groupSize, ackReceived)
 	isMin := true
 	for _, val := range table.table {
-		//log.Printf("val: %v\n", val)
 		if val.msg == nil && !less(entry.clock, val.clock) {
-			//log.Printf("IS PENDING AND LESS THAN ENTRY", val)
 			isMin = false
 		}
 	}
-	//fmt.Printf("%t && %t == %t\n", ackReceived, isMin, ackReceived && isMin)
 	return ackReceived && isMin, nil
 }
 

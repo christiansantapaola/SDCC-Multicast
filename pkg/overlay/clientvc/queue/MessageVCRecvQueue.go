@@ -8,6 +8,13 @@ import (
 	"sync"
 )
 
+/*
+	Qui dentro viene implementato:
+		- MessageHeap una coda ordinata di messaggi da utilizzare con l'implementazione 'container/heap' della
+		  libreria standard di golang.
+		- L'effettiva coda di ricezione dei messaggi.
+*/
+
 type MessageHeap []*pb.MessageVC
 
 func (queue MessageHeap) Len() int      { return len(queue) }
@@ -49,6 +56,23 @@ func (queue MessageHeap) Peek() *pb.MessageVC {
 	}
 }
 
+/*
+	MessageLCRecvQueue:
+	Struttura dati che si occupa di:
+		1. Tenere traccia dei messaggi arrivati/in arrivo
+		2. Tenere traccia dei messaggi di ack arrivati per un determinato messaggio
+		3. Fare in modo che il messaggio rilasciato dalla coda sia il messaggio
+	       con Clock minimo in giro che abbia ricevuto tutti i suoi ack.
+	La coda è thread safe grazie ad un mutex.
+	La coda effettiva è solo per i messaggi che dovranno essere letti dall'utente:
+		- quindi gli ack non vanno inseriti in coda.
+		- solo messaggi applicativi o di sistema.
+	La coda inoltre usa una struttura chiamata MessageTable per tenere traccia dello stato di un messaggio.
+	Un messaggio dovrebbe essere rilasciato solo nel caso in cui:
+		- tutti i suoi ack sono stati ricevuti correttamente.
+		- il suo clock è il più piccolo di tutti i messaggi in giro di cui si è avuto notizia.
+*/
+
 type MessageVCRecvQueue struct {
 	queue        *MessageHeap
 	groups       []string
@@ -69,6 +93,13 @@ func NewMessageVCRecvQueue(groups []string, verbose bool) *MessageVCRecvQueue {
 	}
 }
 
+/*
+	Push:
+		Inserisci il fatto che un nuovo messaggio è arrivato nella message table
+		se il messaggio non è un ack inseriscilo nella coda finale.
+		il metodo è thread safe.
+*/
+
 func (queue *MessageVCRecvQueue) Push(message *pb.MessageVC) error {
 	if message == nil {
 		return fmt.Errorf("messageTable to Push() is nil")
@@ -85,6 +116,15 @@ func (queue *MessageVCRecvQueue) Push(message *pb.MessageVC) error {
 	}
 	return nil
 }
+
+/*
+	Pop:
+		Controlla se vi sono messaggi nella coda.
+		Se il messaggio in cima alla coda risulta pronto per essere rilasciato
+		allora la coda lo rilascia
+		in caso negativo questo metodo ritorna null.
+		null indica che la coda non ha messaggi da rilasciare.
+*/
 
 func (queue *MessageVCRecvQueue) Pop() *pb.MessageVC {
 	queue.mutex.Lock()

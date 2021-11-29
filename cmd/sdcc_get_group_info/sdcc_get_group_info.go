@@ -12,6 +12,12 @@ import (
 	"sdcc/pkg/nameservice/nameservice"
 )
 
+/*
+	Questo eseguibile richiede i partecipanti ad un gruppo esistente al name server.
+	Richiede la presenza di un file di configurazione generato dall'apposito eseguibile
+	`sdcc_gen_config` configurato con i parametri di connessione.
+*/
+
 func GetGRPCConn(serverAddress string, secure bool) (*nameservice.NameServiceClient, error) {
 	var opts []grpc.DialOption
 	if !secure {

@@ -9,6 +9,10 @@ import (
 	pb "sdcc/pkg/nameservice/nameservice"
 )
 
+/*
+	Qui sono contenuti dei wrapper sopra le funzioni generate da grpc per il client.
+*/
+
 func NewClient(serverAddr net.Addr, opts []grpc.DialOption) (*pb.NameServiceClient, error) {
 	conn, err := grpc.Dial(serverAddr.String(), opts...)
 	if err != nil {

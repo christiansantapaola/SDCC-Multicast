@@ -4,6 +4,14 @@ import (
 	"sync"
 )
 
+/*
+	Semplice struttura dati che tiene traccia in maniera thread-safe del clock vettoriale locale.
+	IL suo funzionamento consiste nel:
+		1. prendere il lock con Lock()
+		2. eseguire l'aggiornamento con Increase() / Update()
+		3. rilasciare il lock con Unlock()
+*/
+
 type Clock struct {
 	clock []uint64
 	rank  int

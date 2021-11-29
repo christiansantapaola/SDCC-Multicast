@@ -8,6 +8,14 @@ import (
 	"sort"
 )
 
+/*
+	MulticastGroup
+	Struttura che si ordina di dare ordine al gruppo.
+	Recupera il numero di utenti nel gruppo, il nostro rank al suo interno, il nostro id.
+	Il rank viene effettuato ordinado gli ID in ordine lessicografico.
+	Questa struttura dati si occupa di determinare chi è il sequencer.
+*/
+
 type Users []*pb.User
 
 func (users Users) Len() int           { return len(users) }

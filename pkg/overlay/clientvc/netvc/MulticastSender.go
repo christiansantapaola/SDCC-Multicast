@@ -10,6 +10,14 @@ import (
 	"time"
 )
 
+/*
+	MulticastSender si occcupa di gestire multipli ClientVC.
+	Apre le connessioni con il metodo `Connect()` è ritorna solo nel caso in cui tutti le connessioni
+	che deve gestire sono attive.
+	Il metodo `Send()` si occupa di inviare il messaggio dato a tutti i servizi gestiti.
+	I metodi Try*() si comportano come la loro controparte ma non riprovano l'operazione in caso di errore.
+*/
+
 type MulticastSender struct {
 	services []net.Addr
 	opts     []grpc.DialOption
@@ -25,6 +33,13 @@ func NewMulticastSender(services []net.Addr, opts []grpc.DialOption) (*Multicast
 	multicastSender := MulticastSender{clients: clients, services: services, opts: opts}
 	return &multicastSender, nil
 }
+
+/*
+	Connect:
+		ctx context.Context: contesto per dare un timeout.
+	Connect si assicura che tutti i client grpc siano instanziati è connessi.
+	ritorna errore in caso di timeout scaduto.
+*/
 
 func (multicastSender *MulticastSender) Connect(ctx context.Context) error {
 	multicastSender.mutex.Lock()
@@ -76,6 +91,13 @@ func isAllTrue(vec []bool) bool {
 	return true
 }
 
+/*
+	Send:
+		Invia il messaggio passato da parametro.
+	Send invia il messaggio a tutti i client rpc gestiti.
+	Se non riesce a inviare un messaggio (fallimento della chiamata rpc) continuera a provare fino a che non riesce.
+	I tentativi di comunicazione sono spaziati da un secondo.
+*/
 func (multicastSender *MulticastSender) Send(ctx context.Context, message *pb.MessageVC) error {
 	numClient := len(multicastSender.clients)
 	for i := 0; i < numClient; i++ {
@@ -88,6 +110,11 @@ func (multicastSender *MulticastSender) Send(ctx context.Context, message *pb.Me
 	}
 	return nil
 }
+
+/*
+	TrySend:
+		Come Send, solo che in caso di fallimento non riprova a rimandare il messaggio.
+*/
 
 func (multicastSender *MulticastSender) TrySend(ctx context.Context, message *pb.MessageVC) error {
 	numClient := len(multicastSender.clients)

@@ -7,6 +7,11 @@ import (
 	pb "sdcc/pkg/overlay/clientlc/pb"
 )
 
+/*
+	ClientLC è un oggetto che gestisce una connesione client con il servizio grpc MessageQueueLC
+	Si occupa di aprire una connessione è di chiamare i metodi rpc sul servizio.
+*/
+
 type ClientLC struct {
 	Dial     *grpc.ClientConn
 	ClientLC pb.MessageQueueLCClient

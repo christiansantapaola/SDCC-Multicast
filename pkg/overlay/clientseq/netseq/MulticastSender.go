@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+/*
+	MulticastSender si occcupa di gestire multipli ClientSeq.
+	Apre le connessioni con il metodo `Connect()` è ritorna solo nel caso in cui tutti le connessioni
+	che deve gestire sono attive.
+	Il metodo `Send()` si occupa di inviare il messaggio dato a tutti i servizi gestiti.
+	Il metodo `Relay()` prende in input il rank di un processo ed invia a tutti i processi tranne a quello
+	di cui abbiamo inviato il rank.
+	I metodi Try*() si comportano come la loro controparte ma non riprovano l'operazione in caso di errore.
+*/
+
 type MulticastSender struct {
 	services []net.Addr
 	opts     []grpc.DialOption
@@ -23,6 +33,13 @@ func NewMulticastSender(services []net.Addr, opts []grpc.DialOption) (*Multicast
 	multicastSender := MulticastSender{clients: clients, services: services, opts: opts}
 	return &multicastSender, nil
 }
+
+/*
+	Connect:
+		ctx context.Context: contesto per dare un timeout.
+	Connect si assicura che tutti i client grpc siano instanziati è connessi.
+	ritorna errore in caso di timeout scaduto.
+*/
 
 func (multicastSender *MulticastSender) Connect(ctx context.Context) error {
 	for !multicastSender.AreAllConnected() {
@@ -72,6 +89,11 @@ func isAllTrue(vec []bool) bool {
 	return true
 }
 
+/*
+	Send:
+	Chiama la funziona remota Enqueue su tutti i clientSeq gestiti da multicastSender.
+*/
+
 func (multicastSender *MulticastSender) Send(ctx context.Context, message *pb.MessageSeq) error {
 	numClient := len(multicastSender.clients)
 	for i := 0; i < numClient; i++ {
@@ -97,10 +119,15 @@ func (multicastSender *MulticastSender) TrySend(ctx context.Context, message *pb
 	return nil
 }
 
-func (multicastSender *MulticastSender) Relay(ctx context.Context, message *pb.MessageSeq, myRank int) error {
+/*
+	Relay:
+	Chiama la funzione remota Enqueue su tutti i clientSeq tranne sul clientSeq con indice `rank`.
+*/
+
+func (multicastSender *MulticastSender) Relay(ctx context.Context, message *pb.MessageSeq, rank int) error {
 	numClient := len(multicastSender.clients)
 	for i := 0; i < numClient; i++ {
-		if i != myRank {
+		if i != rank {
 			_, err := multicastSender.clients[i].Enqueue(ctx, message)
 			for err != nil {
 				log.Printf("[MulticastSender.Relay()] %v\n", err)

@@ -10,6 +10,12 @@ import (
 	"sdcc/pkg/overlay/clientseq/queue"
 )
 
+/*
+	Implementazione del server grpc del servizio MessageQueueSeq
+	Il server viene fatto partire su un altro thread da quello chiamante.
+	`ServerSeq` offre una coda FIFO con un metodo remoto Enqueue e un metodo locale Pop per prendere i messaggi invocati.
+*/
+
 type ServerSeq struct {
 	pb.UnimplementedMessageQueueSeqServer
 	queue    *queue.MessageSeqFIFO
@@ -53,8 +59,4 @@ func (receiver *ServerSeq) Enqueue(ctx context.Context, message *pb.MessageSeq) 
 // local function
 func (receiver *ServerSeq) Pop() *pb.MessageSeq {
 	return receiver.queue.Pop()
-}
-
-func (receiver *ServerSeq) Push(msg *pb.MessageSeq) {
-	receiver.queue.Push(msg)
 }

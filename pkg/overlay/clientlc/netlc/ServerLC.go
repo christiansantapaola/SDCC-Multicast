@@ -10,6 +10,16 @@ import (
 	"sdcc/pkg/overlay/clientlc/queue"
 )
 
+/*
+	Implementazione del server grpc del servizio MessageQueueLC:
+		La struttura offre un metodo remote:
+		- `Enqueue()`
+		il quale riceve un messaggio protobuf è lo immette in una coda FIFO
+		A quest ultimo è contrapposto un metodo locale:
+		- `Pop()`
+		Che rimuove il primo elemento dalla coda FIFO.
+*/
+
 type ServerLC struct {
 	pb.UnimplementedMessageQueueLCServer
 	queue    *queue.MessageLCFIFO

@@ -12,6 +12,12 @@ import (
 	"sdcc/pkg/nameservice/nameservice"
 )
 
+/*
+	Questo eseguibile richiede di registrarsi ad un gruppo esistente.
+	Richiede la presenza di un file di configurazione generato dall'apposito eseguibile
+	`sdcc_gen_config` configurato con i parametri di connessione.
+
+*/
 func GetGRPCConn(serverAddress string, secure bool) (*nameservice.NameServiceClient, error) {
 	var opts []grpc.DialOption
 	if !secure {
@@ -55,6 +61,5 @@ func main() {
 	groupInfo := joinGroup(ctx, *cl, *group, cfg.UserId, cfg.UserIp, cfg.UserPort)
 	fmt.Printf("%s\n", "Group Info")
 	fmt.Printf("%s: %s\n", "Group Name", groupInfo.Name)
-	fmt.Printf("%s: %s\n", "Group Type", groupInfo.GetType().String())
 	os.Exit(0)
 }

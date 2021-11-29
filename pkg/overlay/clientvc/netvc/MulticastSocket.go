@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+/*
+	Una MulticastSocket è un oggetto composto da:
+		1. un server grpc che ha funzione di canale di ricezione.
+		2. un MulticastSender che ha funzione di un canale di trasmissione.
+	Questa struttura astrae la comunicazione p2p basata su un server e vari client grpc dando una singola
+	interfaccia per entrambe le situazioni.
+*/
+
 type MulticastSocket struct {
 	server     *ServerLC
 	sender     *MulticastSender
@@ -17,6 +25,12 @@ type MulticastSocket struct {
 	mutex      sync.Mutex
 	verbose    bool
 }
+
+/*
+	Instanzia una Nuova MulticastSocket:
+		- Instanzia su thread separato il server grpc
+		- Instanzia i vari client grpc.
+*/
 
 func Open(ctx context.Context, servicePort int, serverOpts []grpc.ServerOption, senders []net.Addr, dialOpts []grpc.DialOption, verbose bool) (*MulticastSocket, error) {
 	server := NewServerLC(verbose)

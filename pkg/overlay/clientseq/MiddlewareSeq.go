@@ -15,6 +15,18 @@ import (
 	"time"
 )
 
+/*
+	MiddlewareSeq è l'interfaccia con cui l'utente si interfaccia al sistema.
+	Si occupa di:
+		- si connette alla rete di overlay
+		- inizializza le strutture necessarie alla comunicazione
+		- identificare il sequencer tra i peer all'interno del gruppo.
+		- ricevere messaggi/ inviare nuovi messaggi.
+		- se il peer attuale è il sequencer, allora rispedire i messaggi ricevuti a tutti gli altri membri del gruppo.
+		- collezionare informazioni sulla rete.
+	Il suo utilizzo tuttavia si ferma principalmente per operazioni di Send/Recv.
+*/
+
 type SystemEvent int
 
 const (
@@ -57,6 +69,21 @@ type MiddlewareSeq struct {
 	verbose           bool
 }
 
+/*
+	Instanzia un nuovo MiddlewareSeq:
+	self: il mio id all 'interno del gruppo
+	groupName: nome del gruppo
+	logPath: path del file dove verra scritto il log di rete.
+	port: porta di ascolte del server grpc.
+	nameserver: client grpc del nameserver
+	verbose: modalita di operazione debug.
+	trySend: indica di non provare a rimandare i messaggi falliti, utile per il debug.
+	dopt: opzioni per i client grpc
+	sopt: Opzioni per il server grpc
+	La scelta del sequencer viene scelta in maniera del tutto arbitraria ed univoca, il peer con ID più piccolo in
+	ordine lessicografico diventa il sequencer.
+	Il sequencer deve avviare un clientSeq extra rivolto verso se stesso per inviare messaggi.
+*/
 func NewMiddlewareSeq(self, groupName, logPath string, port int, nameserver *nameservice.NameServiceClient, verbose bool, dopt []grpc.DialOption, sopt []grpc.ServerOption) (*MiddlewareSeq, error) {
 	if verbose {
 		log.Printf("client.GetAddressGroup(context.Background(), *nameserver: %v, groupName:%s)\n", nameserver, groupName)
@@ -147,6 +174,9 @@ func (middleware *MiddlewareSeq) GetGroupRank() (int, error) {
 	return middleware.group.GetRank(middleware.group.GetMyID())
 }
 
+/*
+	Se il rank è 0 (dato dall'ordine lessicografico) allora sono il sequencer.
+*/
 func (middleware *MiddlewareSeq) AmITheSequencer() bool {
 	rank, err := middleware.GetGroupRank()
 	if err != nil {
@@ -163,6 +193,13 @@ func ShortID(self string) string {
 	return self[:6]
 }
 
+/*
+	Send:
+		Invio in multicast:
+			Il messaggio viene inviato tramite socket al sequencer.
+			Il sequencer invece utilizza il suo client extra per comunicare i suoi messaggi alla sua interfaccia
+			server.
+*/
 func (middleware *MiddlewareSeq) Send(ctx context.Context, message string) error {
 	clock := middleware.clock.Increase()
 	src := middleware.group.GetMyID()
@@ -257,6 +294,13 @@ func (middleware *MiddlewareSeq) SendSys(ctx context.Context, event SystemEvent)
 	}
 	return nil
 }
+
+/*
+	In MiddlewareWork avviene il lavoro principale del middleware:
+		1. Ricezione di un messaggio
+		2. se sono il sequencer: faccio lo reinvio a tutti tranne che a me.
+		3. aggiungo il messaggio appena ricevuto alla coda di ricezione.
+*/
 
 func (middleware *MiddlewareSeq) MiddlewareWork() {
 	for {

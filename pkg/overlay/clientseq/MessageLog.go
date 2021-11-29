@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+/*
+	MessageLog è una struttura che scrive il log di rete delle operazioni da compiere/compiute.
+	Pensato per essere utilizzato come un log look-ahead.
+	Prima dico quale operazione voglio eseguire la eseguo, poi termino l'operazione con l'evento terminate:
+	- TO_SEND -> (FAILED_TO_SEND/SENT)
+	- RECEIVED / RECEIVED_ACK
+	Il log viene scritto su un file indicato alla creazione del log.
+*/
+
 type MessageLog struct {
 	out   *os.File
 	log   map[string]logEntry
@@ -71,16 +80,4 @@ func (log *MessageLog) Log(status Status, message *api.MessageSeq) error {
 		return err
 	}
 	return nil
-}
-
-func (log *MessageLog) GetMessageToSend() []*api.MessageSeq {
-	log.mutex.Lock()
-	defer log.mutex.Unlock()
-	toSend := make([]*api.MessageSeq, 0)
-	for _, val := range log.log {
-		if val.Status == TO_SEND {
-			toSend = append(toSend, val.Message)
-		}
-	}
-	return toSend
 }

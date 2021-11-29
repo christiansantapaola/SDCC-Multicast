@@ -15,6 +15,11 @@ import (
 	"time"
 )
 
+/*
+	Utility di test del servizio multicast con sequencer.
+	Questa utility manda un numero prestabilito di messaggi alternati da un delay randomico dai 5 ai 10 secondi.
+*/
+
 func SendDelay(ctx context.Context, seq *clientseq.MiddlewareSeq, message string, delay time.Duration) error {
 	time.Sleep(delay)
 	err := seq.Send(ctx, message)

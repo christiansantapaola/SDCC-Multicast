@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+/*
+	Implementazione del lato server grpc del name server:
+*/
+
 type NamingServiceServer struct {
 	pb.UnimplementedNameServiceServer
 	DialTimeout time.Duration

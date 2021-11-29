@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+/*
+	Qui è contenuto il codice che gestisce il file di configurazione dei client:
+	NameServerAddress: l'indirizzo in cui il name server è in ascolto
+	UserID: Id di un utente, rilasciato dal name server
+	UserIP: IP dove il server grpc utente è in ascolto
+	UserPort: Porta dove il server grpc utente è in ascolto
+	Secure: flag se utilizzare tls o no per grpc
+	Verbose: flag se far girare il client in modalita Verbose o meno
+	Timeout: timeout per le connessione al name server.
+*/
+
 type Config struct {
 	NameServerAddress string        `yaml:"name_server_address"`
 	UserId            string        `yaml:"user_id"`
