@@ -2,8 +2,8 @@ package clientlc
 
 import (
 	"fmt"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientlc/pb"
 	"os"
-	api "sdcc/pkg/overlay/clientlc/pb"
 	"sync"
 	"time"
 )

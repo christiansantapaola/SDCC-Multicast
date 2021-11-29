@@ -2,10 +2,10 @@ package netvc
 
 import (
 	"context"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientvc/pb"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	pb "sdcc/pkg/overlay/clientvc/pb"
 	"sync"
 	"time"
 )

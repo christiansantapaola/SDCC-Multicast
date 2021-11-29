@@ -2,9 +2,9 @@ package netseq
 
 import (
 	"context"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/pb"
 	"google.golang.org/grpc"
 	"net"
-	api "sdcc/pkg/overlay/clientseq/pb"
 	"sync"
 	"time"
 )

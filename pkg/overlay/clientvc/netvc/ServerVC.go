@@ -3,11 +3,11 @@ package netvc
 import (
 	"context"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientvc/pb"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientvc/queue"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	pb "sdcc/pkg/overlay/clientvc/pb"
-	"sdcc/pkg/overlay/clientvc/queue"
 )
 
 /*

@@ -2,7 +2,7 @@ package queue
 
 import (
 	"container/list"
-	api "sdcc/pkg/overlay/clientlc/pb"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientlc/pb"
 	"sync"
 )
 

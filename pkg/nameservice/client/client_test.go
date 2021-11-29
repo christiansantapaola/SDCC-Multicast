@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
 	"google.golang.org/grpc"
-	pb "sdcc/pkg/nameservice/nameservice"
 	"testing"
 )
 

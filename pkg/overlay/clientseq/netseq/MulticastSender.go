@@ -2,10 +2,10 @@ package netseq
 
 import (
 	"context"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/pb"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	pb "sdcc/pkg/overlay/clientseq/pb"
 	"time"
 )
 

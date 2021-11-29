@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 	"os"
-	pb "sdcc/pkg/nameservice/nameservice"
-	"sdcc/pkg/nameservice/server"
 )
 
 /*

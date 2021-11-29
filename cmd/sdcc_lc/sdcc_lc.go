@@ -4,14 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/christiansantapaola/SDCC-Multicast/internal"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/client"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientlc"
 	"google.golang.org/grpc"
 	"log"
 	"math/rand"
 	"net"
 	"os"
-	"sdcc/internal"
-	"sdcc/pkg/nameservice/client"
-	"sdcc/pkg/overlay/clientlc"
 	"time"
 )
 

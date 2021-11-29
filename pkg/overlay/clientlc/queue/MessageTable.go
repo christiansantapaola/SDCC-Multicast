@@ -2,7 +2,7 @@ package queue
 
 import (
 	"fmt"
-	api "sdcc/pkg/overlay/clientlc/pb"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientlc/pb"
 	"strconv"
 	"strings"
 	"sync"

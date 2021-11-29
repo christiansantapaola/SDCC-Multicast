@@ -2,9 +2,9 @@ package clientvc
 
 import (
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
 	"log"
 	"net"
-	pb "sdcc/pkg/nameservice/nameservice"
 	"sort"
 )
 

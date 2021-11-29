@@ -3,15 +3,15 @@ package clientseq
 import (
 	"context"
 	"fmt"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/client"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/netseq"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/pb"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/queue"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
-	"sdcc/pkg/nameservice/client"
-	"sdcc/pkg/nameservice/nameservice"
-	"sdcc/pkg/overlay/clientseq/netseq"
-	api "sdcc/pkg/overlay/clientseq/pb"
-	"sdcc/pkg/overlay/clientseq/queue"
 	"time"
 )
 

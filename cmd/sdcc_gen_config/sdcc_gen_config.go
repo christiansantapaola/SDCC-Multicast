@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"github.com/christiansantapaola/SDCC-Multicast/internal"
 	"log"
 	"os"
-	"sdcc/internal"
 )
 
 /*

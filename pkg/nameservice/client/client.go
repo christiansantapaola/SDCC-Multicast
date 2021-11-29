@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 	"errors"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
 	"google.golang.org/grpc"
 	"io"
 	"net"
-	pb "sdcc/pkg/nameservice/nameservice"
 )
 
 /*

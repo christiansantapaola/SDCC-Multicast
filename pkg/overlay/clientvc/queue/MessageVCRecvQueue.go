@@ -3,8 +3,8 @@ package queue
 import (
 	"container/heap"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientvc/pb"
 	"log"
-	pb "sdcc/pkg/overlay/clientvc/pb"
 	"sync"
 )
 

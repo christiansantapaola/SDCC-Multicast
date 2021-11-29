@@ -3,11 +3,11 @@ package netseq
 import (
 	"context"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/pb"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/queue"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	pb "sdcc/pkg/overlay/clientseq/pb"
-	"sdcc/pkg/overlay/clientseq/queue"
 )
 
 /*

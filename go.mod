@@ -1,4 +1,4 @@
-module sdcc
+module github.com/christiansantapaola/SDCC-Multicast
 
 go 1.16
 

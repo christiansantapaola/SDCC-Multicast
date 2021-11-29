@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	pb "github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
 	"go.etcd.io/etcd/client/v3"
 	"google.golang.org/protobuf/proto"
-	pb "sdcc/pkg/nameservice/nameservice"
 	"time"
 )
 

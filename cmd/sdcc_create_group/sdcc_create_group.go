@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/christiansantapaola/SDCC-Multicast/internal"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/client"
+	"github.com/christiansantapaola/SDCC-Multicast/pkg/nameservice/nameservice"
 	"google.golang.org/grpc"
 	"log"
 	"os"
-	"sdcc/internal"
-	"sdcc/pkg/nameservice/client"
-	"sdcc/pkg/nameservice/nameservice"
 )
 
 /*

@@ -2,8 +2,8 @@ package clientseq
 
 import (
 	"fmt"
+	api "github.com/christiansantapaola/SDCC-Multicast/pkg/overlay/clientseq/pb"
 	"os"
-	api "sdcc/pkg/overlay/clientseq/pb"
 	"sync"
 	"time"
 )
