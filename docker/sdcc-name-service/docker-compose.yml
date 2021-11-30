@@ -87,8 +87,10 @@ services:
 networks:
   etcd:
     driver: bridge
+    name: etcd
   sdcc-network:
     driver: bridge
+    name: sdcc-network
 
 volumes:
   etcd1:
