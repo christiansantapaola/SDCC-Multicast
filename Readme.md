@@ -12,12 +12,17 @@ ci saranno i DockerFile che descrivono i container del name service e del client
 ``` sh
 $ cd SDCC-Multicast/docker
 ```
+## Name Service
 entrare dentro la cartella del name service e eseguire la build del container:
 ``` sh
 $ cd sdcc-name-service
 $ docker-compose build
 $ docker-compose up
 ```
+## Client
+Queste istruzioni permettono di creare il container per un client, creare tanti
+container e ripetere queste istruzione per il numero di utenti client
+desiderati.
 Aprire un altra shell ed entrare nella cartella SDCC-Multicast/docker/sdcc e
 fare la build del client
 ``` sh
@@ -51,7 +56,6 @@ user_port: 2079
 secure: false
 verbose: false
 timeout: 5s
-
 ```
 Inserire gli indirizzi del name service e il nostro presi dal comando docker
 rispettivamente in name_server_address e user_ip, non modificare le porte.
@@ -60,7 +64,7 @@ eseguire poi
 ``` sh 
 sdcc_create_user
 sdcc_create_group -group <nome-gruppo>
-sdcc_join_grouo -groip <nome-gruppo>
+sdcc_join_group -group <nome-gruppo>
 ```
 Per registrare l'utente, il gruppo e fare il join.
 eseguire poi a seconda del tipo di comunicazione che si vuole `sdcc_seq`,
