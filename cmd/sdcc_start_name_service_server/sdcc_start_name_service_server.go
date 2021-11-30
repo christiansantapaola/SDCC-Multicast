@@ -10,7 +10,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 )
 
 /*
@@ -26,21 +25,20 @@ var (
 	port     = flag.Int("port", 2080, "The server port")
 	config   = flag.String("config", "sdcc_name_server_config.yml", "path to the config file")
 	help     = flag.Bool("help", false, "print this help message.")
-	endpoint = flag.String("etcd", "127.0.0.1:2079", "endpoint for etcd cluster")
-	timeout  = flag.Duration("timeout", 5*time.Second, "timeout for dial")
 )
 
 func main() {
 	flag.Parse()
 	if *help {
 		flag.PrintDefaults()
+		fmt.Println("SDCC_NAME_SERVER_ETCD: list of etcd endpoint in format\"addr1:port1;addr2:port2\" ")
 		os.Exit(0)
 	}
 	cfg, err := server.ReadCfg(*config)
 	if err != nil {
 		log.Printf("failed to read config: %v", err)
 		log.Printf("generating default config!")
-		err := server.GenDefaultCfg(*config, *timeout, *endpoint)
+		err := server.GenDefaultCfg(*config)
 		if err != nil {
 			log.Fatalf("Can't generate default config: %v", err)
 		}

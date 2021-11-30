@@ -3,6 +3,7 @@ package server
 import (
 	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -34,15 +35,26 @@ func ReadCfg(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-func GenDefaultCfg(path string, timeout time.Duration, etcd string) error {
+func GenDefaultCfg(path string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+	etcd := make([]string, 0)
+	etcdOsVar := os.Getenv("SDCC_NAME_SERVER_ETCD")
+	if etcdOsVar == "" {
+		etcd = append(etcd, "127.0.0.1:2379")
+		etcd = append(etcd, "127.0.0.1:2380")
+	} else {
+		addrs := strings.Split(etcdOsVar, ";")
+		for _, addr := range addrs {
+			etcd = append(etcd, addr)
+		}
+	}
 	cfg := Config{}
-	cfg.Etcd.DialTimeout = timeout
-	cfg.Etcd.Endpoints = []string{etcd}
+	cfg.Etcd.DialTimeout = 5 * time.Second
+	cfg.Etcd.Endpoints = etcd
 	encoder := yaml.NewEncoder(f)
 	err = encoder.Encode(cfg)
 	if err != nil {

@@ -1,8 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -48,13 +51,44 @@ func GenDefaultCfg(path string) error {
 		return err
 	}
 	defer f.Close()
+	nsAddr := os.Getenv("SDCC_NAME_SERVER_ADDRESS")
+	fmt.Println(nsAddr)
+	if nsAddr == "" {
+		nsAddr = "127.0.0.1"
+	}
+	nsPort := os.Getenv("SDCC_NAME_SERVER_PORT")
+	if nsPort == "" {
+		nsPort = "2080"
+	}
+	userIP := os.Getenv("SDCC_HOST_IP")
+	if userIP == "" {
+		userIP = "127.0.0.1"
+	}
+	userPort := os.Getenv("SDCC_HOST_PORT")
+	if userPort == "" {
+		userPort = "2079"
+	}
+	verbose := os.Getenv("SDCC_VERBOSE")
+	if verbose == "" {
+		verbose = "false"
+	}
+	userPortInt, err := strconv.ParseInt(userPort, 10, 32)
+	if err != nil {
+		return err
+	}
+	var verboseBool bool = false
+	if strings.ToLower(verbose) == "true" {
+		verboseBool = true
+	} else {
+		verboseBool = false
+	}
 	cfg := Config{
-		NameServerAddress: "127.0.0.1:2080",
+		NameServerAddress: fmt.Sprintf("%s:%s", nsAddr, nsPort),
 		UserId:            "",
-		UserIp:            "127.0.0.1",
-		UserPort:          2079,
+		UserIp:            userIP,
+		UserPort:          int(userPortInt),
 		Secure:            false,
-		Verbose:           false,
+		Verbose:           verboseBool,
 		Timeout:           time.Duration(5 * time.Second),
 	}
 	encoder := yaml.NewEncoder(f)
