@@ -48,7 +48,7 @@ func main() {
 		}
 	}
 	log.Printf("Read config at '%s' succesfully", *config)
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
