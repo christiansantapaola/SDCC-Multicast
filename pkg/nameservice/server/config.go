@@ -34,15 +34,15 @@ func ReadCfg(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-func GenDefaultCfg(path string) error {
+func GenDefaultCfg(path string, timeout time.Duration, etcd string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	cfg := Config{}
-	cfg.Etcd.DialTimeout = 5 * time.Second
-	cfg.Etcd.Endpoints = []string{"localhost:2379", "localhost:2380"}
+	cfg.Etcd.DialTimeout = timeout
+	cfg.Etcd.Endpoints = []string{etcd}
 	encoder := yaml.NewEncoder(f)
 	err = encoder.Encode(cfg)
 	if err != nil {

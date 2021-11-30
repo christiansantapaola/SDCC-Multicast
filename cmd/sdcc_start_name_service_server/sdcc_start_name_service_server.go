@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 )
 
 /*
@@ -23,8 +24,10 @@ var (
 	certFile = flag.String("cert_file", "", "The TLS cert file")
 	keyFile  = flag.String("key_file", "", "The TLS key file")
 	port     = flag.Int("port", 2080, "The server port")
-	config   = flag.String("config", "config.yml", "path to the config file")
+	config   = flag.String("config", "sdcc_name_server_config.yml", "path to the config file")
 	help     = flag.Bool("help", false, "print this help message.")
+	endpoint = flag.String("etcd", "127.0.0.1:2079", "endpoint for etcd cluster")
+	timeout  = flag.Duration("timeout", 5*time.Second, "timeout for dial")
 )
 
 func main() {
@@ -37,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Printf("failed to read config: %v", err)
 		log.Printf("generating default config!")
-		err := server.GenDefaultCfg(*config)
+		err := server.GenDefaultCfg(*config, *timeout, *endpoint)
 		if err != nil {
 			log.Fatalf("Can't generate default config: %v", err)
 		}
