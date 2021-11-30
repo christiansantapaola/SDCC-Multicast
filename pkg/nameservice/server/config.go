@@ -2,6 +2,7 @@ package server
 
 import (
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -57,6 +58,8 @@ func GenDefaultCfg(path string) error {
 	cfg.Etcd.Endpoints = etcd
 	encoder := yaml.NewEncoder(f)
 	err = encoder.Encode(cfg)
+	log.Printf("SDCC_NAME_SERVER_ETCD: %s\n", etcdOsVar)
+	log.Printf("etcd: %v\n", etcd)
 	if err != nil {
 		return err
 	}
