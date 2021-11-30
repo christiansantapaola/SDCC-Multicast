@@ -20,16 +20,16 @@ $ docker-compose build
 $ docker-compose up
 ```
 ## Client
-Queste istruzioni permettono di creare il container per un client, creare tanti
-container e ripetere queste istruzione per il numero di utenti client
-desiderati.
+Queste istruzioni permettono di creare il container per un client.
+Ripetere queste istruzioni tante volte quanto il numero di client desiderati.
+
 Aprire un altra shell ed entrare nella cartella SDCC-Multicast/docker/sdcc e
 fare la build del client
 ``` sh
 $ cd SDCC-Multicast/docker/sdcc
 $ docker build -t sdcc .
 ``` 
-completata la build si fa partire il client come:
+completata la build si fa partire il container come:
 ``` sh
 $ docker run --network sdcc-network -it sdcc
 ```
@@ -46,7 +46,7 @@ torniamo alla shell del client ed eseguiamo:
 ```
 # sdcc_gen_config
 ```
-per generare la config nel file 'sdcc_config.yml', lo apriamo è troviamo questo
+per generare la config nel file 'sdcc_config.yaml', lo apriamo è troviamo questo
 file:
 ``` yaml
 name_server_address: 127.0.0.1:2080
@@ -70,3 +70,8 @@ Per registrare l'utente, il gruppo e fare il join.
 eseguire poi a seconda del tipo di comunicazione che si vuole `sdcc_seq`,
 `sdcc_lc`, `sdcc_vc` per multicast con sequencer (seq), multicast con clock
 scalare (lc), multicast con clock vettoriale (vc).
+``` sh
+sdcc_seq -group <nome-gruppo>
+sdcc_lc -group <nome-gruppo>
+sdcc_vc -group <nome-gruppo>
+```
