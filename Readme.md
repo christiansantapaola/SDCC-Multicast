@@ -8,7 +8,7 @@ fare il clone del progetto:
 $ git clone https://github.com/christiansantapaola/SDCC-Multicast
 ```
 entrare nella cartella creata ed entrare nella sottocartella Docker, qui dentro
-ci saranno i container del name service e del client.
+ci saranno i DockerFile che descrivono i container del name service e del client.
 ``` sh
 $ cd SDCC-Multicast/docker
 ```
