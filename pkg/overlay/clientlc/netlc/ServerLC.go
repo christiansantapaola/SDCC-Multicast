@@ -34,7 +34,7 @@ func NewServerLC(verbose bool) *ServerLC {
 }
 
 func (receiver *ServerLC) StartServer(port int, opts []grpc.ServerOption) {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
